@@ -1,4 +1,4 @@
-
+<img src='https://github.com/fabiomatricardi/TinyVicuna-2024/raw/main/logo-small.png' width=800>
 
 # TinyVicuna-2024
 Run TinyVicuna-1B with streamlit and llama.cpp server
@@ -39,7 +39,44 @@ TinyVicuna-2024
 ```
 - download and extract the llama.cpp binaries into the `llama.cpp` folder. I used llama-b4231-bin-win-vulkan-x64.zip
  from the official release [https://github.com/ggerganov/llama.cpp/releases/tag/b4231](https://github.com/ggerganov/llama.cpp/releases/tag/b4231)
-- download the GGUF file 
+- download the GGUF file from the official afrideva repo: [tiny-vicuna-1b.q6_k.gguf](https://huggingface.co/afrideva/Tiny-Vicuna-1B-GGUF/resolve/main/tiny-vicuna-1b.q6_k.gguf)
 
 ### Code snipped
+This is the basic code you need to talk to your API endpoint, powered by llama.server:
+
+In one terminal, form the llama.cpp directory run
+```
+llama-server.exe -m .\model\tiny-vicuna-1b.q6_k.gguf -c 2048 --port 8001
+```
+
+
+In another terminal, the with venv activated, run python, and then copy paste the following:
+```
+from openai import OpenAI
+client = OpenAI(base_url="http://localhost:8001/v1", 
+                api_key="not-needed", organization='SelectedModel')
+user_prompt = 'what is Science?'
+prompt = f"A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user's questions. USER: {user_prompt} ASSISTANT:"
+stoptoken = '<s>'
+for items in client.completions.create(
+                prompt = prompt,
+                model='tinyvicuna',
+                temperature=0.15,
+                presence_penalty=1.21,
+                stop=stoptoken,
+                max_tokens=500,              
+                stream=True):
+     print(items.content,end='',flush=True)
+```
+
+## Streamlit interface
+Without closing the llama-server, in the second window run:
+```
+streamlit run .\01.st-API-openAI_stream.py
+```
+Remember to have cloned the repo, there are few images and an INI file required for the Streamlit app
+
+
+
+
 
